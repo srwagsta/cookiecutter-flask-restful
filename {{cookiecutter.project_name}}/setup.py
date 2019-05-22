@@ -12,7 +12,6 @@ setup(
         'flask-sqlalchemy',
         'flask-restful',
         'flask-migrate',
-        'flask-jwt-extended',
         'flask-marshmallow',
         'marshmallow-sqlalchemy',
         'python-dotenv',

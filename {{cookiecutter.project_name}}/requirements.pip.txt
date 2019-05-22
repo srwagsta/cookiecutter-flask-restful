@@ -1,11 +1,14 @@
+gunicorn
+requests
 flask
 flask-restful
 flask-migrate
 flask-sqlalchemy
 flask-marshmallow
-flask-jwt-extended
 marshmallow-sqlalchemy
 python-dotenv
-passlib
-tox{% if cookiecutter.use_celery == "yes" %}
-celery{% endif %}
+tox
+{% if cookiecutter.use_celery == "yes" %}
+celery
+{% endif %}
+psycopg2-binary

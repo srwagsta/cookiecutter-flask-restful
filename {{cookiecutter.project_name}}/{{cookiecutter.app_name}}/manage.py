@@ -19,22 +19,21 @@ def init():
     and create a new user named admin with password admin
     """
     from {{cookiecutter.app_name}}.extensions import db
-    from {{cookiecutter.app_name}}.models import User
     click.echo("create database")
     db.create_all()
     click.echo("done")
 
-    click.echo("create user")
-    user = User(
-        username='admin',
-        email='admin@mail.com',
-        password='admin',
-        active=True
-    )
-    db.session.add(user)
-    db.session.commit()
-    click.echo("created user admin")
 
+@cli.command("create-example")
+def create_example():
+    from {{cookiecutter.app_name}}.models import Example
+    click.echo("create example entry")
+    entry = Example(
+        name='test-entry'
+    )
+    db.session.add(entry)
+    db.session.commit()
+    click.echo("created test example entry")
 
 if __name__ == "__main__":
     cli()

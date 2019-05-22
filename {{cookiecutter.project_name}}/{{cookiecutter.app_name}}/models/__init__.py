@@ -1,8 +1,6 @@
-from .user import User
-from .blacklist import TokenBlacklist
+from .example import Example
 
 
 __all__ = [
-    'User',
-    'TokenBlacklist'
+    'Example'
 ]

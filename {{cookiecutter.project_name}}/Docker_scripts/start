@@ -1,0 +1,5 @@
+#!/bin/sh
+
+{{cookiecutter.app_name}} init
+
+gunicorn  --chdir /API_CODE --bind 0.0.0.0:5000 {{cookiecutter.app_name}}.wsgi:app

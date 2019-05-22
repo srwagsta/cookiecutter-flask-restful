@@ -1,20 +1,48 @@
-# This is a simple Dockerfile to use while developing
-# It's not suitable for production
-#
-# It allows you to run both flask and celery if you enabled it
-# for flask: docker run --env-file=.flaskenv image flask run
-# for celery: docker run --env-file=.flaskenv image celery worker -A myapi.celery_app:app
-#
-# note that celery will require a running broker and result backend
+{% if cookiecutter.use_intel_python == "yes" %}
+FROM intelpython/intelpython3_core:latest
+{% else %}
 FROM python:3.7
+{% endif %}
 
-RUN mkdir /code
-WORKDIR /code
+RUN addgroup --system critsandcoffee \
+    && adduser --system --group api_admin
 
-COPY . /code/
-RUN pip install -r requirements.txt{% if cookiecutter.use_celery == "yes" %}
+RUN mkdir /API_CODE
+WORKDIR /API_CODE
+
+COPY . /API_CODE/
+
+{% if cookiecutter.use_intel_python == "yes" %}
+COPY requirements.pip.txt requirements.pip.txt
+COPY requirements.conda.txt requirements.conda.txt
+RUN conda update conda
+RUN conda install pip
+RUN pip install -U pip
+RUN pip install -r requirements.pip.txt
+RUN conda install --file=requirements.conda.txt
+RUN conda install -c anaconda gunicorn
+RUN conda update --update-all
+{% else %}
+RUN pip install -r requirements.pip.txt
+{% endif %}
+
+{% if cookiecutter.use_celery == "yes" %}
 # needed for docker-compose file that use redis as result-backend
-RUN pip install celery[redis]{% endif %}
-RUN pip install -e .
+RUN pip install celery[redis]
+{% endif %}
 
-EXPOSE 5000
+COPY ./Docker_scripts/start /start
+RUN chmod +x /start
+RUN chown api_admin /start
+
+COPY ./Docker_scripts/entrypoint /entrypoint
+RUN sed -i 's/\r//' /entrypoint
+RUN chmod +x /entrypoint
+RUN chown api_admin /entrypoint
+
+
+RUN chown -R api_admin /API_CODE
+
+USER api_admin
+
+ENTRYPOINT ["/entrypoint"]

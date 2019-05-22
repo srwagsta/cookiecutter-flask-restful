@@ -1,7 +1,7 @@
-from .user import UserResource, UserList
+from .example import ExampleResource, ExampleList
 
 
 __all__ = [
-    'UserResource',
-    'UserList'
+    'ExampleResource',
+    'ExampleList'
 ]

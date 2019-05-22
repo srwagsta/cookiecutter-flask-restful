@@ -1,6 +1,13 @@
 FLASK_ENV=development
 FLASK_APP={{cookiecutter.app_name}}.app:create_app
 SECRET_KEY=changeme
-DATABASE_URI=sqlite:////tmp/{{cookiecutter.app_name}}.db
+
+
+POSTGRES_DB=crits_and_coffee_{{cookiecutter.app_name}}
+
+JWT_VALIDATION_ENDPOINT=auth-api:5000/api/v1/auth/validate
+
+{% if cookiecutter.use_celery == "yes"%}
 CELERY_BROKER_URL=amqp://guest:guest@localhost/
 CELERY_RESULT_BACKEND_URL=amqp://guest:guest@localhost/
+{% endif %}

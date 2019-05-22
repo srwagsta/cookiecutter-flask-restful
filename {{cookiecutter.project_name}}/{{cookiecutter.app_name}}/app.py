@@ -1,7 +1,7 @@
 from flask import Flask
 
-from {{cookiecutter.app_name}} import auth, api
-from {{cookiecutter.app_name}}.extensions import db, jwt, migrate{% if cookiecutter.use_celery == "yes"%}, celery{% endif%}
+from {{cookiecutter.app_name}} import api
+from {{cookiecutter.app_name}}.extensions import db, migrate{% if cookiecutter.use_celery == "yes"%}, celery{% endif%}
 
 
 def create_app(testing=False, cli=False):
@@ -24,7 +24,6 @@ def configure_extensions(app, cli):
     """configure flask extensions
     """
     db.init_app(app)
-    jwt.init_app(app)
 
     if cli is True:
         migrate.init_app(app, db)
@@ -33,7 +32,6 @@ def configure_extensions(app, cli):
 def register_blueprints(app):
     """register all blueprints for application
     """
-    app.register_blueprint(auth.views.blueprint)
     app.register_blueprint(api.views.blueprint){% if cookiecutter.use_celery == "yes" %}
 
 

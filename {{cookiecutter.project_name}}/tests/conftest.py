@@ -1,7 +1,7 @@
 import json
 import pytest
 
-from {{cookiecutter.app_name}}.models import User
+from {{cookiecutter.app_name}}.models import Example
 from {{cookiecutter.app_name}}.app import create_app
 from {{cookiecutter.app_name}}.extensions import db as _db
 
@@ -27,51 +27,11 @@ def db(app):
 
 @pytest.fixture
 def admin_user(db):
-    user = User(
-        username='admin',
-        email='admin@admin.com',
-        password='admin'
+    entry = Example(
+        name='example-test',
     )
 
-    db.session.add(user)
+    db.session.add(entry)
     db.session.commit()
 
-    return user
-
-
-@pytest.fixture
-def admin_headers(admin_user, client):
-    data = {
-        'username': admin_user.username,
-        'password': 'admin'
-    }
-    rep = client.post(
-        '/auth/login',
-        data=json.dumps(data),
-        headers={'content-type': 'application/json'}
-    )
-
-    tokens = json.loads(rep.get_data(as_text=True))
-    return {
-        'content-type': 'application/json',
-        'authorization': 'Bearer %s' % tokens['access_token']
-    }
-
-
-@pytest.fixture
-def admin_refresh_headers(admin_user, client):
-    data = {
-        'username': admin_user.username,
-        'password': 'admin'
-    }
-    rep = client.post(
-        '/auth/login',
-        data=json.dumps(data),
-        headers={'content-type': 'application/json'}
-    )
-
-    tokens = json.loads(rep.get_data(as_text=True))
-    return {
-        'content-type': 'application/json',
-        'authorization': 'Bearer %s' % tokens['refresh_token']
-    }
+    return entry

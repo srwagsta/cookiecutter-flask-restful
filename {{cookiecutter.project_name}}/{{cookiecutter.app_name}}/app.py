@@ -1,6 +1,7 @@
 from flask import Flask
 
 from {{cookiecutter.app_name}} import api
+from {{cookiecutter.app_name}}.commons.exceptions import AuthError, handle_auth_error
 from {{cookiecutter.app_name}}.extensions import db, migrate{% if cookiecutter.use_celery == "yes"%}, celery{% endif%}
 
 
@@ -8,6 +9,7 @@ def create_app(testing=False, cli=False):
     """Application factory, used to create application
     """
     app = Flask('{{cookiecutter.app_name}}')
+    app.register_error_handler(AuthError, handle_auth_error)
     app.config.from_object('{{cookiecutter.app_name}}.config')
 
     if testing is True:

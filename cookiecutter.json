@@ -2,5 +2,5 @@
     "project_name": "restful_api",
     "app_name": "myapi",
     "use_celery": ["no", "yes"],
-    "use_intel_python": ["yes", "no"]
+    "use_data_science_python_distribution": ["no", "yes"]
 }

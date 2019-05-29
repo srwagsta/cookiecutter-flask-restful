@@ -1,24 +1,15 @@
 import os
 import requests
 from functools import wraps
+from flask import request
+from {{cookiecutter.app_name}}.commons.exceptions import AuthError
 
 JWT_VALIDATION_ENDPOINT = os.getenv("JWT_VALIDATION_ENDPOINT")
 
-class AuthError(Exception):
-    def __init__(self, error, status_code):
-        self.error = error
-        self.status_code = status_code
 
-@APP.errorhandler(AuthError)
-def handle_auth_error(ex):
-    response = jsonify(ex.error)
-    response.status_code = ex.status_code
-    return response
-
-def _get_token_auth_header():
+def _get_token_auth_header(auth):
     """Obtains the Access Token from the Authorization Header
     """
-    auth = request.headers.get("Authorization", None)
     if not auth:
         raise AuthError({"code": "authorization_header_missing",
                         "description":
@@ -44,29 +35,34 @@ def _get_token_auth_header():
     return token
 
 
-
 def token_required(f):
     @wraps(f)
     def wrap(*args, **kwargs):
-        token = _get_token_auth_header()
-        
-        response = requests.post(JWT_VALIDATION_ENDPOINT, headers={'authorization': token})
+        response = None
         try:
+            token = _get_token_auth_header(request.headers.get('authorization'))
+            response = requests.get(JWT_VALIDATION_ENDPOINT, headers={'authorization': "Bearer " + token})
             response.raise_for_status()
-            g.claims = response.json().claims
-        except Exception:
-                raise AuthError({"code": "invalid_token",
-                                "description":
-                                    "token rejected"
-                                    " token."}, 401)
+            if not validate_claims(response.json()['claims']):
+                raise AuthError({"code": "invalid_claims",
+                                "description": "The access token did not provided "
+                                               "the required claims to access resource."}, 401)
+        except Exception as e:
+                raise AuthError({"description": "token rejected",
+                                 "token": token,
+                                 "errors": str(e),
+                                 "validation_response": response.json()}, 401)
         return f(*args, **kwargs)
     return wrap
 
-def requires_scope(required_scope):
+
+def validate_claims(response_claims):
     """Determines if the required scope is present in the Access Token
     Args:
         required_scope (str): The scope required to access the resource
     """
+    import sys
+    print(f'*** CLAIMS VALIDATION: ${response_claims} ***', file=sys.stderr)
     # token = get_token_auth_header()
     # unverified_claims = jwt.get_unverified_claims(token)
     # if unverified_claims.get("scope"):
@@ -74,4 +70,4 @@ def requires_scope(required_scope):
     #         for token_scope in token_scopes:
     #             if token_scope == required_scope:
     #                 return True
-    return False
+    return True

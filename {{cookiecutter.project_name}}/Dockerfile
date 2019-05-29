@@ -1,5 +1,5 @@
 {% if cookiecutter.use_intel_python == "yes" %}
-FROM intelpython/intelpython3_core:latest
+FROM continuumio/miniconda3:latest
 {% else %}
 FROM python:3.7
 {% endif %}

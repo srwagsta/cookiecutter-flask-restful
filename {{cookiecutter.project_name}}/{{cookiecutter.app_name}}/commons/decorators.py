@@ -3,6 +3,7 @@ import requests
 from functools import wraps
 from flask import request
 from {{cookiecutter.app_name}}.commons.exceptions import AuthError
+from {{cookiecutter.app_name}}.config import ACCEPTED_CLAIMS_SET
 
 JWT_VALIDATION_ENDPOINT = os.getenv("JWT_VALIDATION_ENDPOINT")
 
@@ -38,7 +39,6 @@ def _get_token_auth_header(auth):
 def token_required(f):
     @wraps(f)
     def wrap(*args, **kwargs):
-        response = None
         try:
             token = _get_token_auth_header(request.headers.get('authorization'))
             response = requests.get(JWT_VALIDATION_ENDPOINT, headers={'authorization': "Bearer " + token})
@@ -49,9 +49,7 @@ def token_required(f):
                                                "the required claims to access resource."}, 401)
         except Exception as e:
                 raise AuthError({"description": "token rejected",
-                                 "token": token,
-                                 "errors": str(e),
-                                 "validation_response": response.json()}, 401)
+                                 "errors": str(e)}, 401)
         return f(*args, **kwargs)
     return wrap
 
@@ -59,15 +57,9 @@ def token_required(f):
 def validate_claims(response_claims):
     """Determines if the required scope is present in the Access Token
     Args:
-        required_scope (str): The scope required to access the resource
+        response_claims(str): The scope required to access the resource
     """
-    import sys
-    print(f'*** CLAIMS VALIDATION: ${response_claims} ***', file=sys.stderr)
-    # token = get_token_auth_header()
-    # unverified_claims = jwt.get_unverified_claims(token)
-    # if unverified_claims.get("scope"):
-    #         token_scopes = unverified_claims["scope"].split()
-    #         for token_scope in token_scopes:
-    #             if token_scope == required_scope:
-    #                 return True
-    return True
+    response_claims_set = set(response_claims)
+    if len(response_claims_set.intersection(ACCEPTED_CLAIMS_SET)) > 0:
+        return True
+    return False
